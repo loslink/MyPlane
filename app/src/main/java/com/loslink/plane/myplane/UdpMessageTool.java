@@ -51,14 +51,19 @@ public class UdpMessageTool {
     // 接收从指定的服务端发回的数据. hostName 服务端主机 hostPort 服务端端口 return 服务端发回的数据.
     public final synchronized String receive(final String hostName,
                                              final int hostPort) {
-        DatagramPacket dp = new DatagramPacket(bytes, bytes.length);
+        DatagramPacket dp;
         try {
+//            dp = new DatagramPacket(bytes, bytes.length);
+            dp = new DatagramPacket(bytes, 0,bytes.length,InetAddress.getByName(hostName),hostPort);
             mDatagramSocket.receive(dp);
         } catch (Exception e) {
             e.printStackTrace();
             return "";
         }
-        String result = new String(dp.getData(), 0, dp.getLength());
+        String result = null;
+        if(dp!=null){
+            result = new String(dp.getData(), 0, dp.getLength());
+        }
         return result;
     }
 

@@ -15,7 +15,7 @@ public class MainActivity extends AppCompatActivity {
     // 服务器主机ip
     private static final String HOST = "192.168.0.0";
     // 服务器请求端口号
-    private static final int PORT = 12345;
+    private static final int PORT = 6000;
     // 随便定义的发送内容，发送格式是与服务器端协议
     private static final String CONTENT = "SEND MESSAGE?key1=abc&key2=cba";
     @SuppressLint("HandlerLeak")
@@ -33,20 +33,20 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        findViewById(R.id.udp).setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View arg0) {
-                new Thread(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        //Looper.prepare();
-                        sendDataByUDP();
-                    }
-                }).start();
-            }
-        });
+//        findViewById(R.id.udp).setOnClickListener(new View.OnClickListener() {
+//
+//            @Override
+//            public void onClick(View arg0) {
+//                new Thread(new Runnable() {
+//
+//                    @Override
+//                    public void run() {
+//                        //Looper.prepare();
+//                        sendDataByUDP();
+//                    }
+//                }).start();
+//            }
+//        });
     }
 
     private void sendDataByUDP() {
