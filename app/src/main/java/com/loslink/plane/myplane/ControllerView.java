@@ -79,8 +79,8 @@ class ControllerView extends View {
         canvas.drawCircle(leftCenterX,leftCenterY,baseCicleRadius, baseCirclePaint);
         canvas.drawCircle(rightCenterX,rightCenterY,baseCicleRadius, baseCirclePaint);
 
-        canvas.drawCircle(leftBarCenterX,leftBarCenterY,baseCicleRadius, barCirclePaint);
-        canvas.drawCircle(rightBarCenterX,rightBarCenterY,baseCicleRadius, barCirclePaint);
+        canvas.drawCircle(leftBarCenterX,leftBarCenterY,baseBarCicleRadius, barCirclePaint);
+        canvas.drawCircle(rightBarCenterX,rightBarCenterY,baseBarCicleRadius, barCirclePaint);
     }
 
     public int dip2px(int dipValue) {
