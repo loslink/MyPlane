@@ -2,41 +2,37 @@ package com.loslink.plane.myplane;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.ComposePathEffect;
-import android.graphics.CornerPathEffect;
-import android.graphics.DashPathEffect;
-import android.graphics.DiscretePathEffect;
 import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.PathDashPathEffect;
-import android.graphics.PathEffect;
-import android.graphics.SumPathEffect;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 
 class ControllerView extends View {
-    float phase;
-    PathEffect[] effects=new PathEffect[7];
-    int[] colors;
-    private Paint paint;
-    Path path;
+
+    private Paint baseCirclePaint,barCirclePaint;
+    private Context context;
+    private float canvasWidth,canvasHeight;
+    private float baseCicleRadius=100,baseBarCicleRadius=50;
+    private float leftCenterX,leftCenterY,rightCenterX,rightCenterY;
+    private float leftBarCenterX,leftBarCenterY,rightBarCenterX,rightBarCenterY;
 
     public ControllerView(Context context) {
-        super(context);
+        this(context,null);
         init();
     }
 
     public ControllerView(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs,0);
         init();
     }
 
     public ControllerView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        this.context=context;
         init();
     }
 
@@ -46,51 +42,85 @@ class ControllerView extends View {
         init();
     }
     public void init() {
-        paint=new Paint();
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(4);
-        //创建初始化Path
-        path=new Path();
-        path.moveTo(0, 0);   //设置绘制的起点在左上角
-        for (int i = 1; i <=15; i++) {
-            path.lineTo(i*20, (float)Math.random()*60);
-        }
-        colors=new int[]{Color.BLACK,Color.BLUE,Color.CYAN,Color.GREEN,Color.MAGENTA,Color.RED,Color.YELLOW};
+        baseCirclePaint =new Paint();
+        baseCirclePaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        baseCirclePaint.setColor(context.getResources().getColor(R.color.control_base));
+
+        barCirclePaint =new Paint();
+        barCirclePaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        barCirclePaint.setColor(context.getResources().getColor(R.color.control_bar));
+
+        baseCicleRadius=dip2px(100);
+
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        canvasWidth=w;
+        canvasHeight=h;
+
+        leftCenterX=canvasWidth/4;
+        leftCenterY=canvasHeight/2;
+
+        rightCenterX=canvasWidth*3/4;
+        rightCenterY=canvasHeight/2;
+
+        leftBarCenterX=canvasWidth/4;
+        leftBarCenterY=canvasHeight/2;
+
+        rightBarCenterX=canvasWidth*3/4;
+        rightBarCenterY=canvasHeight/2;
     }
 
     @Override
     protected void onDraw(Canvas canvas)   {
-        //将背景填充成白色
-        canvas.drawColor(Color.WHITE);
-        //-------下面开始初始化7中路径的效果
-        //使用路径效果
-        effects[0] = null;
-        //使用CornerPathEffect路径效果
-        effects[1] = new CornerPathEffect(10);
-        //初始化DiscretePathEffect
-        effects[2] = new DiscretePathEffect(3.0f,5.0f);
-        //初始化DashPathEffect
-        effects[3] = new DashPathEffect(new float[]{20,10,5,10},phase);
-        //初始化PathDashPathEffect
-        Path p = new Path();
-        p.addRect(0, 0, 8, 8, Path.Direction.CCW);
-        effects[4] = new PathDashPathEffect(p,12,phase,PathDashPathEffect.Style.ROTATE);
-        //初始化PathDashPathEffect
-        effects[5] = new ComposePathEffect(effects[2],effects[4]);
-        effects[6] = new SumPathEffect(effects[4],effects[3]);
-        //将画布移到8,8处开始绘制
-        canvas.translate(8, 8);
-        //依次使用7中不同路径效果,7种不同的颜色来绘制路径
-        for(int i = 0; i < effects.length; i++)
-        {
-            paint.setPathEffect(effects[i]);
-            paint.setColor(colors[i]);
-            canvas.drawPath(path, paint);
-            canvas.translate(0, 60);
+
+        canvas.drawCircle(leftCenterX,leftCenterY,baseCicleRadius, baseCirclePaint);
+        canvas.drawCircle(rightCenterX,rightCenterY,baseCicleRadius, baseCirclePaint);
+
+        canvas.drawCircle(leftBarCenterX,leftBarCenterY,baseCicleRadius, barCirclePaint);
+        canvas.drawCircle(rightBarCenterX,rightBarCenterY,baseCicleRadius, barCirclePaint);
+    }
+
+    public int dip2px(int dipValue) {
+        float reSize = context.getResources().getDisplayMetrics().density;
+        return (int) ((dipValue * reSize) + 0.5);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event){
+        int action = event.getAction();
+        switch(action){
+            case MotionEvent.ACTION_POINTER_1_DOWN:
+                showMessage("第一个手指按下");
+                break;
+            case MotionEvent.ACTION_POINTER_1_UP:
+                showMessage("第一个手指抬起");
+                break;
+            case MotionEvent.ACTION_POINTER_2_DOWN:
+                showMessage("第二个手指按下");
+                break;
+            case MotionEvent.ACTION_POINTER_2_UP:
+                showMessage("第二个手指抬起");
+                break;
+            case MotionEvent.ACTION_POINTER_3_DOWN:
+                showMessage("第三个手指按下");
+                break;
+            case MotionEvent.ACTION_POINTER_3_UP:
+                showMessage("第三个手指抬起");
+                break;
+            default:
+                showMessage("只有一个手指");
+                break;
         }
-        //改变phase值,形成动画效果
-        phase += 1;
-        invalidate();
+        return true;
+    }
+
+    private void showMessage(String s){
+//        Toast toast = Toast.makeText(context, s, Toast.LENGTH_SHORT);
+//        toast.show();
+        Log.v("showMessage","showMessage: "+s);
     }
 }
 
