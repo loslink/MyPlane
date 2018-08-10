@@ -51,6 +51,7 @@ class ControllerView extends View {
         barCirclePaint.setColor(context.getResources().getColor(R.color.control_bar));
 
         baseCicleRadius=dip2px(100);
+        baseBarCicleRadius=dip2px(50);
 
     }
 
@@ -114,6 +115,7 @@ class ControllerView extends View {
                 showMessage("只有一个手指");
                 break;
         }
+
         return true;
     }
 
