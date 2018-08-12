@@ -115,8 +115,24 @@ class ControllerView extends View {
                 showMessage("只有一个手指");
                 break;
         }
+        if(isLeft(event.getX())){
+            leftBarCenterX=event.getX();
+            leftBarCenterY=event.getY();
+        }else{
+            rightBarCenterX=event.getX();
+            rightBarCenterY=event.getY();
+        }
+        invalidate();
 
         return true;
+    }
+
+    private boolean isLeft(float x){
+        if(x <= (canvasWidth/2)){
+            return true;
+        }else {
+            return false;
+        }
     }
 
     private void showMessage(String s){
