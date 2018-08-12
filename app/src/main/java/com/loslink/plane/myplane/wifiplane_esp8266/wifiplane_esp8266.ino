@@ -12,8 +12,8 @@
 #define ST_LED  2
 #define L_MOTOR D1
 #define R_MOTOR D2
-#define T_MOTOR D3
-#define B_MOTOR D4
+#define T_MOTOR D6
+#define B_MOTOR D8
 #define DC_RSSI 1500  // Time in mS for send RSSI
 #define DC_RX   900   // Time in mS for tx inactivity 200 old problem of motor stopping flickring
 ADC_MODE(ADC_VCC);
@@ -64,12 +64,12 @@ void setup() {
 //  remotIp[3] = 255;
 //  Udp.begin(localPort);
 }
-int speedN=12;
+int speedN=22;
 void testMotor(){
-//  analogWrite(L_MOTOR,speedN);
-//  analogWrite(R_MOTOR,speedN);
+  analogWrite(L_MOTOR,speedN);
+  analogWrite(R_MOTOR,speedN);
   analogWrite(T_MOTOR,speedN);
-//  analogWrite(B_MOTOR,speedN);
+  analogWrite(B_MOTOR,speedN);
   Serial.print("testMotor");
   }
 
