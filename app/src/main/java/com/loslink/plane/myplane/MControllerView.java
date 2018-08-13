@@ -110,15 +110,31 @@ class MControllerView extends View {
         return (int) ((dipValue * reSize) + 0.5);
     }
 
+    float dragX,dragY;
+
     @Override
     public boolean onTouchEvent(MotionEvent event){
-        float x = event.getX(0);//获得第二个手指的坐标
+        float x = event.getX(0);
         float y = event.getY(0);
-        dealFinger(x,y);
+        if(isDragAirea(x,y)){
+            dragX=x;
+            dragY=y;
+        }else {
+
+        }
+        dealFinger(dragX,dragY);
         if(event.getAction()==MotionEvent.ACTION_UP){
-            startAnimation(x,y);
+            startAnimation(dragX,dragY);
         }
         return true;
+    }
+
+    private boolean isDragAirea(float x,float y){
+        double distance=Math.sqrt((x-(canvasWidth/2))*(x-(canvasWidth/2))+(y-(canvasHeight/2))*(y-(canvasHeight/2)));
+        if(distance <= baseCicleRadius){
+            return true;
+        }
+        return false;
     }
 
     private void dealFinger(float x,float y){
