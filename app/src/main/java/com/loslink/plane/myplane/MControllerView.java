@@ -12,7 +12,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
-import android.view.animation.OvershootInterpolator;
 
 class MControllerView extends View {
 
@@ -20,8 +19,18 @@ class MControllerView extends View {
     private Context context;
     private float canvasWidth,canvasHeight;
     private float baseCicleRadius=100,baseBarCicleRadius=50;
-    private float leftCenterX,leftCenterY;
-    private float leftBarCenterX,leftBarCenterY;
+    private float centerX, centerY;
+    private float barCenterX, barCenterY;
+    private ControllerListenr controllerListenr;
+
+
+    public ControllerListenr getControllerListenr() {
+        return controllerListenr;
+    }
+
+    public void setControllerListenr(ControllerListenr controllerListenr) {
+        this.controllerListenr = controllerListenr;
+    }
 
     public MControllerView(Context context) {
         this(context,null);
@@ -46,10 +55,12 @@ class MControllerView extends View {
     }
     public void init() {
         baseCirclePaint =new Paint();
+        baseCirclePaint.setAntiAlias(true);
         baseCirclePaint.setStyle(Paint.Style.FILL_AND_STROKE);
         baseCirclePaint.setColor(context.getResources().getColor(R.color.control_base));
 
         barCirclePaint =new Paint();
+        barCirclePaint.setAntiAlias(true);
         barCirclePaint.setStyle(Paint.Style.FILL_AND_STROKE);
         barCirclePaint.setColor(context.getResources().getColor(R.color.control_bar));
 
@@ -64,19 +75,19 @@ class MControllerView extends View {
         canvasWidth=w;
         canvasHeight=h;
 
-        leftCenterX=canvasWidth/2;
-        leftCenterY=canvasHeight/2;
+        centerX =canvasWidth/2;
+        centerY =canvasHeight/2;
 
-        leftBarCenterX=canvasWidth/2;
-        leftBarCenterY=canvasHeight/2;
+        barCenterX =canvasWidth/2;
+        barCenterY =canvasHeight/2;
 
     }
 
     @Override
     protected void onDraw(Canvas canvas)   {
 
-        canvas.drawCircle(leftCenterX,leftCenterY,baseCicleRadius, baseCirclePaint);
-        canvas.drawCircle(leftBarCenterX,leftBarCenterY,baseBarCicleRadius, barCirclePaint);
+        canvas.drawCircle(centerX, centerY,baseCicleRadius, baseCirclePaint);
+        canvas.drawCircle(barCenterX, barCenterY,baseBarCicleRadius, barCirclePaint);
     }
 
     private void startAnimation(float fX,float fY){
@@ -87,7 +98,7 @@ class MControllerView extends View {
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                leftBarCenterX=(float)animation.getAnimatedValue();
+                barCenterX =(float)animation.getAnimatedValue();
                 invalidate();
             }
         });
@@ -99,7 +110,7 @@ class MControllerView extends View {
         valueAnimatorY.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                leftBarCenterY=(float)animation.getAnimatedValue();
+                barCenterY =(float)animation.getAnimatedValue();
                 invalidate();
             }
         });
@@ -120,13 +131,33 @@ class MControllerView extends View {
             dragX=x;
             dragY=y;
         }else {
-
+            touchOutside(x,y);
         }
         dealFinger(dragX,dragY);
         if(event.getAction()==MotionEvent.ACTION_UP){
             startAnimation(dragX,dragY);
         }
+        progress();
         return true;
+    }
+
+    private void progress(){
+        if(controllerListenr!=null){
+            float prog=Math.abs(barCenterY - centerY)/baseCicleRadius;
+            controllerListenr.updateListener(prog);
+        }
+    }
+
+    private void touchOutside(float x,float y){
+        float y1= centerY;
+        float y2=y;
+        float x1= centerX;
+        float x2=x;
+        float a=y1-y2;
+        float b=x2-x1;
+        float r=baseCicleRadius;
+        dragX= (float) (x1+b*r/Math.sqrt(a*a+b*b));
+        dragY= (float) (y1-a*r/Math.sqrt(a*a+b*b));
     }
 
     private boolean isDragAirea(float x,float y){
@@ -139,13 +170,17 @@ class MControllerView extends View {
 
     private void dealFinger(float x,float y){
         showMessage(x+"  "+y);
-        leftBarCenterX=x;
-        leftBarCenterY=y;
+        barCenterX =x;
+        barCenterY =y;
         invalidate();
     }
 
     private void showMessage(String s){
         Log.v("showMessage","showMessage: "+s);
+    }
+
+    public interface ControllerListenr{
+        void updateListener(float progress);
     }
 }
 

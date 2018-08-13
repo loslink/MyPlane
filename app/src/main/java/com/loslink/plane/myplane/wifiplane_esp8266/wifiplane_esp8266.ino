@@ -51,18 +51,18 @@ void setup() {
   digitalWrite(ST_LED,HIGH);
   Serial.begin(115200);
   WiFi.begin(ssid, pass);
- testMotor();
-//  while (WiFi.status() != WL_CONNECTED) 
-//  {
-//    digitalWrite(ST_LED,LOW);
-//    delay(60);
-//    digitalWrite(ST_LED,HIGH);
-//    delay(1000);
-//    Serial.print(".");
-//  }
-//  remotIp=WiFi.localIP();
-//  remotIp[3] = 255;
-//  Udp.begin(localPort);
+// testMotor();
+  while (WiFi.status() != WL_CONNECTED) 
+  {
+    digitalWrite(ST_LED,LOW);
+    delay(60);
+    digitalWrite(ST_LED,HIGH);
+    delay(1000);
+    Serial.print(".");
+  }
+  remotIp=WiFi.localIP();
+  remotIp[3] = 255;
+  Udp.begin(localPort);
 }
 int speedN=22;
 void testMotor(){
@@ -76,36 +76,38 @@ void testMotor(){
 // the loop function runs over and over again forever
 void loop() {
   
-    digitalWrite(ST_LED,LOW);
-    delay(1000);
-    digitalWrite(ST_LED,HIGH);
-    delay(1000);
-   
-//  if(WiFi.status() == WL_CONNECTED)
-//  {
 //    digitalWrite(ST_LED,LOW);
-//    // if there's data available, read a packet
-//    int packetSize = Udp.parsePacket();
-//    if (packetSize) 
-//    {
-//      // read the packet into packetBufffer
-//      int len = Udp.read(packetBuffer, 10);
-//      if (len > 2) 
-//      {
-//        if(packetBuffer[0] == P_ID)
-//        {
-//          l_speed = (unsigned int)packetBuffer[1]*2-2;
+//    delay(1000);
+//    digitalWrite(ST_LED,HIGH);
+//    delay(1000);
+   
+  if(WiFi.status() == WL_CONNECTED)
+  {
+    Serial.println("WL_CONNECTED");
+    digitalWrite(ST_LED,LOW);
+    // if there's data available, read a packet
+    int packetSize = Udp.parsePacket();
+    Serial.println("packetSize"+packetSize);
+    if (packetSize) 
+    {
+      // read the packet into packetBufffer
+      int len = Udp.read(packetBuffer, 10);
+      if (len > 2) 
+      {
+        if(packetBuffer[0] == P_ID)
+        {
+          l_speed = (unsigned int)packetBuffer[1]*2-2;
 //          r_speed = (unsigned int)packetBuffer[2]*2-2;
-//          //Serial.print(l_speed);
-//          //Serial.print(" \t");
-//          //Serial.println(r_speed);
-//          analogWrite(L_MOTOR,l_speed);
+          //Serial.print(l_speed);
+          //Serial.print(" \t");
+          Serial.println(r_speed);
+          analogWrite(L_MOTOR,l_speed);
 //          analogWrite(R_MOTOR,r_speed);
-//          premillis_rx = millis();
-//        }
-//      }
-//      
-//    }
+          premillis_rx = millis();
+        }
+      }
+      
+    }
 //    if(millis()-premillis_rssi > DC_RSSI)
 //    {
 //       premillis_rssi = millis();
@@ -124,17 +126,17 @@ void loop() {
 //       analogWrite(R_MOTOR,0);
 //       Serial.println("nodata");
 //     }
-//  }
-//  else
-//  {
-//    digitalWrite(ST_LED,LOW);
-//    delay(60);
-//    digitalWrite(ST_LED,HIGH);
-//    delay(1000);
-//    analogWrite(L_MOTOR,0);
-//    analogWrite(R_MOTOR,0);
-//    analogWrite(T_MOTOR,0);
-//    analogWrite(B_MOTOR,0);
-//    digitalWrite(ST_LED,HIGH);
-//  }
+  }
+  else
+  {
+    digitalWrite(ST_LED,LOW);
+    delay(60);
+    digitalWrite(ST_LED,HIGH);
+    delay(1000);
+    analogWrite(L_MOTOR,0);
+    analogWrite(R_MOTOR,0);
+    analogWrite(T_MOTOR,0);
+    analogWrite(B_MOTOR,0);
+    digitalWrite(ST_LED,HIGH);
+  }
 }

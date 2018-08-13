@@ -13,11 +13,13 @@
         <!--android:layout_height="match_parent" />-->
 
     <com.loslink.plane.myplane.MControllerView
+        android:id="@+id/cv_left"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1" />
 
     <com.loslink.plane.myplane.MControllerView
+        android:id="@+id/cv_right"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1" />
