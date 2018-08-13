@@ -92,6 +92,8 @@ class ControllerView extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event){
         int action = event.getAction();
+        int pointerCount = event.getPointerCount();
+
         switch(action){
             case MotionEvent.ACTION_POINTER_1_DOWN:
                 showMessage("第一个手指按下");
@@ -112,19 +114,29 @@ class ControllerView extends View {
                 showMessage("第三个手指抬起");
                 break;
             default:
-                showMessage("只有一个手指");
+//                showMessage("只有一个手指");
                 break;
         }
-        if(isLeft(event.getX())){
-            leftBarCenterX=event.getX();
-            leftBarCenterY=event.getY();
+        float x = event.getX(0);//获得第二个手指的坐标
+        float y = event.getY(0);
+        dealFinger(x,y);
+        if(pointerCount>1){
+            dealFinger(event.getX(1),event.getY(1));
+        }
+        return true;
+    }
+
+    private void dealFinger(float x,float y){
+        if(isLeft(x)){
+            leftBarCenterX=x;
+            leftBarCenterY=y;
+            showMessage2("left:"+x);
         }else{
-            rightBarCenterX=event.getX();
-            rightBarCenterY=event.getY();
+            rightBarCenterX=x;
+            rightBarCenterY=y;
+            showMessage2("right:"+x);
         }
         invalidate();
-
-        return true;
     }
 
     private boolean isLeft(float x){
@@ -133,6 +145,12 @@ class ControllerView extends View {
         }else {
             return false;
         }
+    }
+
+    private void showMessage2(String s){
+//        Toast toast = Toast.makeText(context, s, Toast.LENGTH_SHORT);
+//        toast.show();
+        Log.v("showMessage2","showMessage: "+s);
     }
 
     private void showMessage(String s){
