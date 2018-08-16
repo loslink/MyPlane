@@ -18,6 +18,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class MainActivity extends AppCompatActivity {
 
     private final static String TAG = MainActivity.class.getSimpleName();
@@ -28,13 +31,13 @@ public class MainActivity extends AppCompatActivity {
     private static final int PORT = 6000;
     // 随便定义的发送内容，发送格式是与服务器端协议
     private static final String CONTENT = "SEND MESSAGE?key1=abc&key2=cba";
-    private MControllerView controllerViewLeft,controllerViewRight;
-    private int MAX_DATA=256;
+    private MControllerView controllerViewLeft, controllerViewRight;
+    private int MAX_DATA = 256;
     private Integer data;
     byte P_ID = 1;
 
-    private String mDeviceName="BT05";
-    private String mDeviceAddress="00:15:87:00:B0:70";
+    private String mDeviceName = "BT05";
+    private String mDeviceAddress = "00:15:87:00:B0:70";
     private BluetoothLeService mBluetoothLeService;
     private boolean mConnected = false;
 
@@ -53,8 +56,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        controllerViewLeft=findViewById(R.id.cv_left);
-        controllerViewRight=findViewById(R.id.cv_right);
+        controllerViewLeft = findViewById(R.id.cv_left);
+        controllerViewRight = findViewById(R.id.cv_right);
 
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         Log.d(TAG, "Try to bindService=" + bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE));
@@ -63,18 +66,18 @@ public class MainActivity extends AppCompatActivity {
         controllerViewRight.setControllerListenr(new MControllerView.ControllerListenr() {
             @Override
             public void updateListener(float progress) {
-                final int value= (int) (MAX_DATA*progress);
-                data=value;
+                final int value = (int) (MAX_DATA * progress);
+                data = value;
 
             }
         });
         new Thread(new Runnable() {
             @Override
             public void run() {
-                while (true){
-                    if(data!=null){
+                while (true) {
+                    if (data != null) {
                         sendDataByBT(data);
-                        data=null;
+                        data = null;
                     }
                     try {
                         Thread.sleep(5);
@@ -86,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }).start();
+        startTimer();
     }
 
     private void sendDataByBT(int data) {
@@ -94,10 +98,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void sendDataByUDP(int data) {
         try {
-            Log.v("controllerViewRight","value: "+data);
+            Log.v("controllerViewRight", "value: " + data);
             byte[] byteData = new byte[2];
-            byteData[0]=P_ID;
-            byteData[1]=(byte) data;
+            byteData[0] = P_ID;
+            byteData[1] = (byte) data;
             mUdpMessageTool = UdpMessageTool.getInstance();
             mUdpMessageTool.setTimeOut(5000);// 设置超时为5s
             // 向服务器发数据
@@ -147,13 +151,12 @@ public class MainActivity extends AppCompatActivity {
             } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
                 mConnected = false;
                 invalidateOptionsMenu();
-            }else if(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action))
-            {
+            } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
                 mConnected = true;
                 ShowDialog();
                 Log.e(TAG, "In what we need");
                 invalidateOptionsMenu();
-            }else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
+            } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
                 Log.e(TAG, "RECV DATA");
                 String data = intent.getStringExtra(BluetoothLeService.EXTRA_DATA);
                 if (data != null) {
@@ -163,8 +166,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private void ShowDialog()
-    {
+    private void ShowDialog() {
         Toast.makeText(this, "已连接", Toast.LENGTH_SHORT).show();
     }
 
@@ -181,16 +183,30 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(mBluetoothLeService != null)
-        {
+        if (mBluetoothLeService != null) {
             mBluetoothLeService.close();
             mBluetoothLeService = null;
         }
-        if(mConnected)
-        {
+        if (mConnected) {
             mBluetoothLeService.disconnect();
             mConnected = false;
         }
         Log.d(TAG, "We are in destroy");
     }
+
+    private void startTimer() {
+
+        TimerTask mTimerTask = new TimerTask() {
+            @Override
+            public void run() {
+                if(!mConnected){
+                    mBluetoothLeService.connect(mDeviceAddress);
+                    mConnected = true;
+                }
+            }
+        };
+        Timer mTimer = new Timer();
+        mTimer.scheduleAtFixedRate(mTimerTask, 200L, 300L);//200毫秒执行一次轮询，是否有加锁应用
+    }
+
 }
