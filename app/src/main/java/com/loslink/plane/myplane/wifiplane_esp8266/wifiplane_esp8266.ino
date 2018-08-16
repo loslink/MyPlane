@@ -36,7 +36,9 @@ WiFiUDP Udp;
 
 // the setup function runs once when you press reset or power the board
 void setup() {
+
   WiFi.mode(WIFI_STA);
+
   //WiFi.setOutputPower(2.5);
   analogWriteRange(255);
   pinMode(L_MOTOR, OUTPUT);
@@ -50,20 +52,23 @@ void setup() {
   pinMode(ST_LED, OUTPUT);
   digitalWrite(ST_LED,HIGH);
   Serial.begin(115200);
-  WiFi.begin(ssid, pass);
-// testMotor();
-  while (WiFi.status() != WL_CONNECTED) 
-  {
-    digitalWrite(ST_LED,LOW);
-    delay(60);
-    digitalWrite(ST_LED,HIGH);
-    delay(1000);
-    Serial.print(".");
-  }
-  remotIp=WiFi.localIP();
-  remotIp[3] = 255;
-  Udp.begin(localPort);
+
+//  WiFi.begin(ssid, pass);
+//  while (WiFi.status() != WL_CONNECTED)
+//  {
+//    digitalWrite(ST_LED,LOW);
+//    delay(60);
+//    digitalWrite(ST_LED,HIGH);
+//    delay(1000);
+//    Serial.print(".");
+//  }
+//  remotIp=WiFi.localIP();
+//  remotIp[3] = 255;
+//  Udp.begin(localPort);
+
+
 }
+
 int speedN=22;
 void testMotor(){
   analogWrite(L_MOTOR,speedN);
@@ -75,24 +80,39 @@ void testMotor(){
 
 // the loop function runs over and over again forever
 void loop() {
-  
+
+//   controllFromWifi();
+  controllFromBT();
+
+}
+
+
+controllFromBT(){
+    if (Serial.available() > 0) {//蓝牙
+    int ch = Serial.read();
+    speedN = ch;
+    }
+  testMotor();
+}
+
+controllFromWifi(){
+
 //    digitalWrite(ST_LED,LOW);
 //    delay(1000);
 //    digitalWrite(ST_LED,HIGH);
 //    delay(1000);
-   
-  if(WiFi.status() == WL_CONNECTED)
+if(WiFi.status() == WL_CONNECTED)
   {
     Serial.println("WL_CONNECTED");
     digitalWrite(ST_LED,LOW);
     // if there's data available, read a packet
     int packetSize = Udp.parsePacket();
     Serial.println("packetSize"+packetSize);
-    if (packetSize) 
+    if (packetSize)
     {
       // read the packet into packetBufffer
       int len = Udp.read(packetBuffer, 10);
-      if (len > 2) 
+      if (len > 2)
       {
         if(packetBuffer[0] == P_ID)
         {
@@ -106,7 +126,7 @@ void loop() {
           premillis_rx = millis();
         }
       }
-      
+
     }
 //    if(millis()-premillis_rssi > DC_RSSI)
 //    {
@@ -115,7 +135,7 @@ void loop() {
 //       float vcc = (((float)ESP.getVcc()/(float)1024.0)+0.75f)*10;
 //       replyBuffer[1] = (unsigned char)rssi;
 //       replyBuffer[2] = (unsigned char)vcc;
-//       
+//
 //       Udp.beginPacket(remotIp, remotPort);
 //       Udp.write(replyBuffer);
 //       Udp.endPacket();

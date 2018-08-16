@@ -49,7 +49,7 @@ go();
   //delay(100);
   //Serial.println("outside");
   // put your main code here, to run repeatedly:
-  if (Serial.available() > 0) {
+  if (Serial.available() > 0) {//蓝牙
     //    Serial.println("inside");
     char ch = Serial.read();
     //      Serial.println(ch);

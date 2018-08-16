@@ -1,7 +1,15 @@
 package com.loslink.plane.myplane;
 
 import android.annotation.SuppressLint;
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,6 +20,7 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
+    private final static String TAG = MainActivity.class.getSimpleName();
     private UdpMessageTool mUdpMessageTool;
     // 服务器主机ip
     private static final String HOST = "192.168.0.0";
@@ -23,6 +32,11 @@ public class MainActivity extends AppCompatActivity {
     private int MAX_DATA=256;
     private Integer data;
     byte P_ID = 1;
+
+    private String mDeviceName="BT05";
+    private String mDeviceAddress="00:15:87:00:B0:70";
+    private BluetoothLeService mBluetoothLeService;
+    private boolean mConnected = false;
 
     @SuppressLint("HandlerLeak")
     private Handler mHandler = new Handler() {
@@ -42,6 +56,10 @@ public class MainActivity extends AppCompatActivity {
         controllerViewLeft=findViewById(R.id.cv_left);
         controllerViewRight=findViewById(R.id.cv_right);
 
+        Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
+        Log.d(TAG, "Try to bindService=" + bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE));
+
+        registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
         controllerViewRight.setControllerListenr(new MControllerView.ControllerListenr() {
             @Override
             public void updateListener(float progress) {
@@ -55,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 while (true){
                     if(data!=null){
-                        sendDataByUDP(data);
+                        sendDataByBT(data);
                         data=null;
                     }
                     try {
@@ -68,6 +86,10 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }).start();
+    }
+
+    private void sendDataByBT(int data) {
+        mBluetoothLeService.WriteInt(data);
     }
 
     private void sendDataByUDP(int data) {
@@ -95,5 +117,80 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         mUdpMessageTool.close();
+    }
+
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
+            if (!mBluetoothLeService.initialize()) {
+                Log.e(TAG, "Unable to initialize Bluetooth");
+                finish();
+            }
+            mBluetoothLeService.connect(mDeviceAddress);
+            Log.e(TAG, "mBluetoothLeService is okay");
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mBluetoothLeService = null;
+        }
+    };
+
+    private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
+                Log.e(TAG, "Only gatt, just wait");
+            } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
+                mConnected = false;
+                invalidateOptionsMenu();
+            }else if(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action))
+            {
+                mConnected = true;
+                ShowDialog();
+                Log.e(TAG, "In what we need");
+                invalidateOptionsMenu();
+            }else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
+                Log.e(TAG, "RECV DATA");
+                String data = intent.getStringExtra(BluetoothLeService.EXTRA_DATA);
+                if (data != null) {
+
+                }
+            }
+        }
+    };
+
+    private void ShowDialog()
+    {
+        Toast.makeText(this, "已连接", Toast.LENGTH_SHORT).show();
+    }
+
+    private static IntentFilter makeGattUpdateIntentFilter() {
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
+        intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
+        intentFilter.addAction(BluetoothDevice.ACTION_UUID);
+        return intentFilter;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(mBluetoothLeService != null)
+        {
+            mBluetoothLeService.close();
+            mBluetoothLeService = null;
+        }
+        if(mConnected)
+        {
+            mBluetoothLeService.disconnect();
+            mConnected = false;
+        }
+        Log.d(TAG, "We are in destroy");
     }
 }
