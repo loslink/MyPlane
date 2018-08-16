@@ -200,8 +200,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 if(!mConnected){
-                    mBluetoothLeService.connect(mDeviceAddress);
-                    mConnected = true;
+//                    mBluetoothLeService.connect(mDeviceAddress);
+//                    mConnected = true;
                 }
             }
         };

@@ -71,11 +71,11 @@ void setup() {
 
 int speedN=22;
 void testMotor(){
-  analogWrite(L_MOTOR,speedN);
-  analogWrite(R_MOTOR,speedN);
-  analogWrite(T_MOTOR,speedN);
-  analogWrite(B_MOTOR,speedN);
-  Serial.print("testMotor");
+//  analogWrite(L_MOTOR,speedN);
+//  analogWrite(R_MOTOR,speedN);
+//  analogWrite(T_MOTOR,speedN);
+//  analogWrite(B_MOTOR,speedN);
+  
   }
 
 // the loop function runs over and over again forever
@@ -86,16 +86,38 @@ void loop() {
 
 }
 
-
-controllFromBT(){
-    if (Serial.available() > 0) {//蓝牙
-    int ch = Serial.read();
-    speedN = ch;
+#include <EEPROM.h>
+union data
+{
+  int a;
+  byte b[4];
+};
+data col;
+void controllFromBT(){
+  int i=0;
+    while (Serial.available() > 0) {//蓝牙
+    byte ch = Serial.read();
+    Serial.println(ch);
+    col.b[i]=ch;
+    if(i==3){
+      i=0;
+      speedN = col.a;
+      Serial.print("speedN：");
+      Serial.println(col.a);
+      }else{
+        i++;
+        }
+    
+//    for(int i=0;i<4;i++){
+//      col.b[i]=EEPROM.read(i);
+//      }
+    
+    
     }
   testMotor();
 }
 
-controllFromWifi(){
+void controllFromWifi(){
 
 //    digitalWrite(ST_LED,LOW);
 //    delay(1000);
