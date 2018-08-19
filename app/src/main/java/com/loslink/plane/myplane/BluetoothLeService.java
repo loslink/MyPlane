@@ -73,7 +73,15 @@ public class BluetoothLeService extends Service {
 
     public void WriteInt(int data)
     {
-        mNotifyCharacteristic.setValue(ByteUtil.intToByteArray(data));
+//        Log.v("WriteInt", "" + data);
+//        byte[] va="3".getBytes();
+       byte[] va= ByteUtil.intToByteArray(data);
+       for(byte b:va){
+           Log.v("WriteInt", "b:" + b);
+    }
+
+        Log.v("WriteInt", "data:" +  ByteUtil.byteArrayToInt(va));
+        mNotifyCharacteristic.setValue(va);
         mBluetoothGatt.writeCharacteristic(mNotifyCharacteristic);
     }
     

@@ -38,7 +38,8 @@ WiFiUDP Udp;
 void setup() {
 
   WiFi.mode(WIFI_STA);
-
+  Serial.begin(115200);
+//  Serial.begin(9600);
   //WiFi.setOutputPower(2.5);
   analogWriteRange(255);
   pinMode(L_MOTOR, OUTPUT);
@@ -51,7 +52,6 @@ void setup() {
 //  analogWrite(B_MOTOR,0);
   pinMode(ST_LED, OUTPUT);
   digitalWrite(ST_LED,HIGH);
-  Serial.begin(115200);
 
 //  WiFi.begin(ssid, pass);
 //  while (WiFi.status() != WL_CONNECTED)
@@ -71,52 +71,40 @@ void setup() {
 
 int speedN=22;
 void testMotor(){
-//  analogWrite(L_MOTOR,speedN);
-//  analogWrite(R_MOTOR,speedN);
-//  analogWrite(T_MOTOR,speedN);
-//  analogWrite(B_MOTOR,speedN);
+  analogWrite(L_MOTOR,speedN);
+  analogWrite(R_MOTOR,speedN);
+  analogWrite(T_MOTOR,speedN);
+  analogWrite(B_MOTOR,speedN);
   
   }
 
 // the loop function runs over and over again forever
 void loop() {
-
 //   controllFromWifi();
   controllFromBT();
 
 }
-
-#include <EEPROM.h>
-union data
-{
-  int a;
-  byte b[4];
-};
-data col;
+char buffer[4];
+int nRead;
 void controllFromBT(){
   int i=0;
-    while (Serial.available() > 0) {//蓝牙
-    byte ch = Serial.read();
-    Serial.println(ch);
-    col.b[i]=ch;
-    if(i==3){
-      i=0;
-      speedN = col.a;
-      Serial.print("speedN：");
-      Serial.println(col.a);
-      }else{
-        i++;
-        }
-    
-//    for(int i=0;i<4;i++){
-//      col.b[i]=EEPROM.read(i);
-//      }
-    
+    if (Serial.available() > 0) {//蓝牙
+    nRead = Serial.readBytes(buffer, 4);
+    if(nRead == 4){
+      speedN=byteArrayToInt();
+      Serial.println(speedN);
+      }
     
     }
   testMotor();
 }
-
+int byteArrayToInt() {
+        return   buffer[3] & 0xFF |
+                (buffer[2] & 0xFF) << 8 |
+                (buffer[1] & 0xFF) << 16 |
+                (buffer[0] & 0xFF) << 24;
+}
+ 
 void controllFromWifi(){
 
 //    digitalWrite(ST_LED,LOW);

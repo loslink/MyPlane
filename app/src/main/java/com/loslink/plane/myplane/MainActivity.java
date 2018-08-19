@@ -32,7 +32,8 @@ public class MainActivity extends AppCompatActivity {
     // 随便定义的发送内容，发送格式是与服务器端协议
     private static final String CONTENT = "SEND MESSAGE?key1=abc&key2=cba";
     private MControllerView controllerViewLeft, controllerViewRight;
-    private int MAX_DATA = 256;
+//    private int MAX_DATA = 256;
+    private int MAX_DATA = 50;
     private Integer data;
     byte P_ID = 1;
 
@@ -80,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
                         data = null;
                     }
                     try {
-                        Thread.sleep(5);
+                        Thread.sleep(300);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
