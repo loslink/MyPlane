@@ -6,4 +6,9 @@
 
     <color name="control_base">#22000000</color>
     <color name="control_bar">#000000</color>
+
+    <color name="buttonCircleColor">#767676</color>
+    <color name="buttonBaseColor">#22000000</color>
+
+    <color name="bgColor">#333d48</color>
 </resources>

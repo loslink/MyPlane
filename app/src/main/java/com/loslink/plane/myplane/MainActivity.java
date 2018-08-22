@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private String mDeviceAddress = "00:15:87:00:B0:70";
     private BluetoothLeService mBluetoothLeService;
     private boolean mConnected = false;
+    private SwitchButton switchButton;
 
     @SuppressLint("HandlerLeak")
     private Handler mHandler = new Handler() {
@@ -59,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         controllerViewLeft = findViewById(R.id.cv_left);
         controllerViewRight = findViewById(R.id.cv_right);
+        switchButton = findViewById(R.id.sb_my);
 
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         Log.d(TAG, "Try to bindService=" + bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE));
@@ -91,6 +93,14 @@ public class MainActivity extends AppCompatActivity {
             }
         }).start();
         startTimer();
+        switchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switchButton.openButton();
+                mBluetoothLeService.connect(mDeviceAddress);
+                mConnected = true;
+            }
+        });
     }
 
     private void sendDataByBT(int data) {
@@ -152,9 +162,11 @@ public class MainActivity extends AppCompatActivity {
             } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
                 mConnected = false;
                 invalidateOptionsMenu();
+                switchButton.closeButton();
             } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
                 mConnected = true;
                 ShowDialog();
+                switchButton.openButton();
                 Log.e(TAG, "In what we need");
                 invalidateOptionsMenu();
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
