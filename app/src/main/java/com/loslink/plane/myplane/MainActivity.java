@@ -166,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
             } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
                 mConnected = true;
                 ShowDialog();
-                switchButton.openButton();
+                switchButton.openYesButton();
                 Log.e(TAG, "In what we need");
                 invalidateOptionsMenu();
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {

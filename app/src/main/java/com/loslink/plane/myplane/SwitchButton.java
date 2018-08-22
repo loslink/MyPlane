@@ -131,6 +131,15 @@ class SwitchButton extends View {
 
     }
 
+    public void openYesButton() {
+        this.post(new Runnable() {
+            @Override
+            public void run() {
+                startYesAnimation();
+            }
+        });
+    }
+
     private void drawButton(Canvas canvas) {
 
         Path path1 = new Path();
@@ -171,17 +180,12 @@ class SwitchButton extends View {
             }
         });
 
+    }
+
+    private void startYesAnimation() {
 
         final ValueAnimator valueAnimator = ValueAnimator.ofFloat(radius * 2, originalWidth);
-        scrollAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                valueAnimator.start();
-            }
-        });
-
-
+        valueAnimator.start();
         valueAnimator.setRepeatCount(0);
         valueAnimator.setInterpolator(new AccelerateInterpolator());
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
